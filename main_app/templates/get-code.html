@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}
+     <title>Get Code</title>
+{% endblock title %}
+{% block base_image %}
+     {% if userprofile.image %}
+	  <img class="media-object img-thumbnail user-img main-img" alt="User Picture" src="/static/uploads/{{userprofile.image}}" />
+     {% else %}
+	  <img class="media-object img-thumbnail user-img" alt="User Picture" src="/static/img/user.gif" />
+     {% endif %}
+{% endblock base_image %}
+{% block css %}
+     <link rel="stylesheet" href="/static/plugins/switch/static/stylesheets/bootstrap-switch.css" />	
+     <link rel="stylesheet" href="/static/css/bootstrap-fileupload.min.css" />
+{% endblock css %}
+{% block sidebar %}
+     <li class="panel"><a href="{% url 'view_chat' %}" ><i class="icon-table"></i> Dashboard</a></li>
+     <li class="panel">
+	  <a href="{% url 'get_visitors' %}" data-parent="#menu" data-toggle="collapse" class="accordion-toggle"
+	     data-target="#chart-nav">
+	       <i class="icon-bar-chart"></i> Vistors
+	  </a>
+     </li>
+     <li class="panel">
+        <a href="{% url 'get_code' %}"><i class="icon-table"></i> Get Code
+            <span class="pull-right"><i class="icon-angle-left"></i></span>
+        </a>
+     </li>
+     <li class="panel"><a href="{% url 'chat_full_history' %}"><i class="icon-table"></i>Full Chat History</a></li>
+{% endblock sidebar %}
+{% block javascript %}
+    <script type="text/javascript">
+        var user_key = '{{userprofile.user_api}}';
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.async = true;
+        script.src = 'http://{{request_url}}/static/js/chat_include.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(script, s);
+    </script>
+{% endblock javascript %}

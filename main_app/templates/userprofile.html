@@ -1,0 +1,139 @@
+﻿{% extends "base.html" %}
+{% block title %}
+     <title>User Profile</title>
+{% endblock title %}
+{% block css %}
+     <link rel="stylesheet" href="/static/plugins/switch/static/stylesheets/bootstrap-switch.css" />	
+     <link rel="stylesheet" href="/static/css/bootstrap-fileupload.min.css" />
+{% endblock css %}
+{% block sidebar %}
+     <li class="panel"><a href="{% url 'view_chat' %}" ><i class="icon-table"></i> Dashboard</a></li>
+     <li class="panel">
+	  <a href="{% url 'get_visitors' %}" data-parent="#menu" data-toggle="collapse" class="accordion-toggle"
+	     data-target="#chart-nav">
+	       <i class="icon-bar-chart"></i> Vistors
+	       <span class="pull-right"><i class="icon-angle-left"></i></span>
+	  </a>
+     </li>
+     <li class="panel"><a href="{% url 'get_code' %}"><i class="icon-table"></i> Get Code</a></li>
+     <li class="panel"><a href="{% url 'chat_full_history' %}"><i class="icon-table"></i>Full Chat History</a></li>
+{% endblock sidebar %}
+{% block content %}
+     <div id="content">
+          <div class="inner">
+               <div class="row">
+                    <div class="col-lg-12"><h2> User Profile </h2></div>
+	       </div>
+	       <hr />
+	       <div class="row">
+		    <div class="col-lg-12">
+			 <div class="box">
+			      <header class="dark">
+				   <div class="icons"><i class="icon-cloud-upload"></i></div>
+				   <h5>Profile Settings</h5>
+				   <div class="toolbar">
+                                        <ul class="nav">
+					     <li>
+						  <div class="btn-group">
+						       <a class="accordion-toggle btn btn-xs minimize-box" data-toggle="collapse"
+							   href="#collapseOne">
+							   <i class="icon-chevron-up"></i>
+						       </a>
+						  </div>
+					     </li>
+                                        </ul>
+                                    </div>
+				
+			      </header>
+			      <div class="body">
+				   {% if message %}
+					     <p class="alert alert-success">{{message}}</p>
+					{% endif %}
+				  <form action="" method="POST" enctype="multipart/form-data" class="form-horizontal"
+					id="block-validate">
+				      
+				       <div id="collapseOne" class="accordion-body collapse in body">
+					     <div class="form-group">
+						  <label class="control-label col-lg-4">First Name</label>
+						  <div class="col-lg-4">
+						       <input type="text" {% if user.first_name %} value="{{user.first_name}}"
+							       {% else %} value = "" {% endif %}
+							      id="required2" name="first_name" class="form-control" />
+						  </div>
+					     </div>
+					     <div class="form-group">
+						  <label class="control-label col-lg-4">Last Name</label>
+						  <div class="col-lg-4">
+						       <input type="text" {% if user.last_name %} value="{{user.last_name}}"
+							      {% else %} value = "" {% endif %} id="required2"
+							      name="last_name" class="form-control" />
+						  </div>
+					     </div>
+					     <div class="form-group">
+						  <label class="control-label col-lg-4">Email</label>
+						  <div class="col-lg-4">
+						      <input type="email" {% if user.email %}
+							     value="{{user.email}}" {% else %} value = "" {% endif %}
+							     id="email2" name="email" class="form-control" />
+						  </div>
+					     </div>
+					     <div class="form-group">
+						  <label class="control-label col-lg-4">Phone Number</label>
+						  <div class="col-lg-4">
+						      <input type="text" id="required2" {% if userprofile.phone %}
+							     value="{{userprofile.phone}}" {% else %} value = "" {% endif %}
+							     name="phone" class="form-control" />
+						  </div>
+					     </div>
+					     <div class="form-group">
+						 <label class="control-label col-lg-4">Button Name</label>
+						 <div class="col-lg-4">
+						     <input type="text" id="required2" {% if userprofile.button_name %}
+							    value="{{userprofile.button_name}}" {% else %} value = "" {% endif %}
+						     name="button_name" class="form-control" />
+						 </div>
+					     </div>                
+					     <div class="form-group">
+						  <label class="control-label col-lg-4">Pre Defined Image</label>
+						  <div class="col-lg-8">
+						       <div class="fileupload fileupload-new" data-provides="fileupload">
+							    <div class="fileupload-new thumbnail" style="width: 200px; height: 150px;">
+								 {% if userprofile.image %}
+								      <img src="/static/uploads/{{userprofile.image}}" alt="" />
+								 {% else %}
+								      <img src="/static/img/demoUpload.jpg" alt="" />
+								 {% endif %}
+								 
+							    </div>
+							    <div class="fileupload-preview fileupload-exists thumbnail"
+								 style="max-width: 200px; max-height: 150px; line-height: 20px;">
+								 
+							    </div>
+							    <div>
+								 <span class="btn btn-file btn-primary">
+								      <span class="fileupload-new">Select image</span>
+								      <span class="fileupload-exists">Change</span>
+								      <input type="file" name="file"/>
+								 </span>
+								 <a href="#" class="btn btn-danger fileupload-exists"
+								    data-dismiss="fileupload">Remove</a>
+							    </div>
+						       </div>
+						  </div>
+					     </div>
+					     <div class="form-actions no-margin-bottom" style="text-align:center;">
+						 <input type="submit" value="Click To Save Changes" class="btn btn-primary btn-lg"/>
+					     </div>
+					</div>
+				   </form>
+			      </div>
+			 </div>
+		    </div>
+	       </div>
+	  </div>
+    </div>
+{% endblock content %}
+{% block js %}
+     <script src="/static/plugins/switch/static/js/bootstrap-switch.min.js"></script>
+     <script src="/static/plugins/jasny/js/bootstrap-fileupload.js"></script>
+{% endblock js %}

@@ -1,0 +1,229 @@
+﻿{% extends "base.html" %}
+
+{% block title %}
+     <title>Chat Admin Dashboard</title>
+{% endblock title %}
+{% block base_image %}
+     {% if userprofile.image %}
+	  <img class="media-object img-thumbnail user-img main-img" alt="User Picture" src="/static/uploads/{{userprofile.image}}" />
+     {% else %}
+	  <img class="media-object img-thumbnail user-img" alt="User Picture" src="/static/img/user.gif" />
+     {% endif %}
+{% endblock base_image %}
+{% block sidebar %}
+     <li class="panel">
+	  <a href="#" data-parent="#menu" data-toggle="collapse" class="accordion-toggle" data-target="#pagesr-nav">
+	       <i class="icon-table"></i> Chat History
+	       <span class="pull-right"><i class="icon-angle-left"></i></span>&nbsp;
+	       <span class="label label-info right_notification">{{chat_count}}</span>&nbsp;
+	  </a>
+	  <ul class="collapse chat_now_parent" id="pagesr-nav">
+	       {% if chatvisitor %}
+		    {% for i in chatvisitor %}
+			 <li><a class="chat_now {{i.id}}" >
+			      <i class="icon-angle-right"></i><span class="user_chat_id"> {{i.name}}</span>
+			      <i class="icon-remove-sign remove_chat" style="float:right;"></i>
+			 </a>
+			 </li>
+		    {% endfor %}
+	       {% else %}
+		    <p class="no_visitors" >No visitors</p>
+	       {% endif %}
+	  </ul>
+     </li>
+     <li class="panel">
+	  <a href="{% url 'get_visitors' %}" data-parent="#menu" data-toggle="collapse" class="accordion-toggle" data-target="#chart-nav">
+	       <i class="icon-bar-chart"></i> Vistors
+	  </a>
+     </li>
+     <li class="panel"><a href="{% url 'get_code' %}"><i class="icon-table"></i> Get Code</a></li>
+     <li class="panel"><a href="{% url 'chat_full_history' %}"><i class="icon-table"></i> Full Chat History</a></li>
+{% endblock sidebar %}
+
+{% block content %}
+     <div id="content"></div>
+{% endblock content %}
+
+<!--
+<script src="http://cdn.sockjs.org/sockjs-0.3.min.js"></script>
+<script src="/static/js/thunder.js"></script>
+<script type="text/javascript">
+Thunder.connect("localhost:8000", "key", ["test"], {log: true, user: 'somerandomid'});
+Thunder.listen(function(data) {
+    alert(data);
+});
+</script>
+-->
+{% block javascript %}
+<script src="http://js.pusher.com/2.2/pusher.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+     var pusher = new Pusher('a8355dbe7a6a0daf08a4');
+     var channel = pusher.subscribe('{{userprofile.user_api}}');
+     channel.bind('visitor_chat', function(data) {
+	  alert(data.message + ' from ' + data.name);
+	  $('.right_notification').text(parseInt($('.right_notification').text()) + 1);
+	  var add_visitor = $('<li><a class="chat_now '+data.id+'" ><i class="icon-angle-right"></i><span class="user_chat_id \
+			      dynamic_add"> '+data.name+'</span> <i class="icon-remove-sign remove_chat" style="float:right;"></i\
+			      ></a></li>');
+	  $(add_visitor).prependTo('.chat_now_parent');
+	  var user_channel = pusher.subscribe(data.api);
+	  user_channel.bind('user_message_transfer', function(data){
+	       var class_len = $('no_visitors').length;
+	       if (class_len  > 0) {$('no_visitors').remove();}
+	       var add_div = $('<li class="right clearfix"><span class="chat-img pull-right">\
+				    <img src="/static/img/demoUpload.jpg" alt="User Avatar" class="img-circle added_image" />\
+				    </span><div class="chat-body clearfix"><div class="header">\
+				    <small class=" text-muted label label-info">'+data.time+'</small>\
+				    <strong class="pull-right primary-font">'+data.name+'</strong></div><br />\
+				    <p>'+data.message+'</p></div></li>');
+	       add_div.appendTo('.chat_append_message');
+	  })
+     });
+</script>
+<script>
+     $(document).ready(function(){
+	  $(document).on('click', '.user_chat_id', function(){
+	       $('.inner').remove();
+	       var chat_id = $(this).closest('.chat_now').attr('class').split(' ').pop();
+	       var dynamic = $(this).hasClass('dynamic_add');
+	       var name = $(this).text()
+	       $.ajax({
+		    url: '/chat_history?chat_id='+chat_id, method:'GET',
+		    success: function(data) {
+			 $('.inner').remove();
+			 var attach = $('<div class="inner" style="min-height:1200px;">\
+			 <div class="row"><div class="col-lg-12"><h2>Chat DashBoard</h2></div>\
+			 <div class="col-lg-7"><div class="chat-panel panel panel-success">\
+			 <div class="panel-heading"><i class="icon-comments"></i>New Comments</div>\
+			 <div class="panel-body"><ul class="chat chat_append_message">\
+			 </ul></div><div class="panel-footer"><form class="chat_form" method="POST">\
+			 <div class="input-group"><p class="visitor_type" style="display:none;"></p>\
+			 <input type="hidden" class="chat_id"  name="chat_id" value="'+chat_id+'" />\
+			 <input id="btn-input" type="text" name="message" class="form-control input-sm form_chat_message"\
+			 placeholder="Type your comment here..." />\
+			 <span class="input-group-btn"><input type="submit" class="btn btn-success btn-sm"\
+			 id="btn-chat" value="Send"></span></div></form></div></div></div></div><hr /></div>');
+			 attach.appendTo('#content');
+			 if (dynamic == true) {
+			      var dt = new Date();
+			      var time = dt.getHours() + ":" + dt.getMinutes() + ":" + dt.getSeconds();
+			      var add_div = $('<li class="right clearfix"><span class="chat-img pull-right">\
+				    <img src="/static/img/demoUpload.jpg" alt="User Avatar" class="img-circle added_image" />\
+				    </span><div class="chat-body clearfix"><div class="header">\
+				    <small class=" text-muted label label-info">'+time+'</small>\
+				    <strong class="pull-right primary-font">'+name+'</strong></div><br />\
+				    <p>'+name+' has join the chat</p></div></li>');
+			      add_div.appendTo('.chat_append_message');
+			 }
+			 for (i=0; i<data[0].response.length; i++) {
+			      append_chat(data[0].response[i]);
+			 }
+			 var user_channel = pusher.subscribe(data[1].chatapi);
+			 var type_channel = pusher.subscribe(data[1].chatapi);
+			 user_channel.unbind('user_message_transfer');
+			 user_channel.bind('user_message_transfer', function(data){
+			      if (data.user_type == "type") {
+				   if (data.chat == "start") {
+					$('.visitor_type').text(data.message+' is typing');
+				   }else{
+					$('.visitor_type').text(data.message+' has stopped typing');
+				   }
+				   $('.visitor_type').show();
+			      }else{
+			      $('.panel-heading').text('you are ready to chat');
+			      var class_len = $('no_visitors').length;
+			      if (class_len  > 0) {$('no_visitors').remove();}
+			      var add_div = $('<li class="right clearfix"><span class="chat-img pull-right">\
+						   <img src="/static/img/demoUpload.jpg" alt="User Avatar" class="img-circle added_image" />\
+						   </span><div class="chat-body clearfix"><div class="header">\
+						   <small class=" text-muted label label-info"><i class="icon-time"></i>'+data.time+'</small>\
+						   <strong class="pull-right primary-font"> '+data.name+'</strong></div><br />\
+						   <p>'+data.message+'</p></div></li>');
+			      add_div.appendTo('.chat_append_message');
+			      }
+			 });
+		    }
+	       });
+	  })
+	  function append_chat(data) {
+	       if (data.chatter == "visitor") {
+		    var add_div = $('<li class="left clearfix"><span class="chat-img pull-left"><img \
+					src="/static/img/demoUpload.jpg" alt="User Avatar" class="img-circle added_image" /></span>\
+					<div class="chat-body clearfix"><div class="header"><strong class="primary-font ">\
+					'+data.name+'</strong><small class="pull-right text-muted label label-danger">\
+					<i class="icon-time"></i>'+data.time+'</small></div><br /><p class="'+data.id+'">\
+					'+data.message+'</p></div></li>');
+	       }else{
+		    var add_div = $('<li class="right clearfix"><span class="chat-img pull-right">\
+					<img src="/static/uploads/'+data.image+'" alt="User Avatar" class="img-circle added_image" />\
+					</span><div class="chat-body clearfix"><div class="header">\
+					<small class=" text-muted label label-info"><i class="icon-time"></i>'+data.time+'\
+					</small><strong class="pull-right primary-font"> \
+					'+data.username+'\
+					</strong></div><br /><p class="'+data.id+'">'+data.message+'</p></div></li>');
+	       }
+	       add_div.appendTo('.chat_append_message');
+	  }
+	  $(document).on('submit', '.chat_form', function(e){
+	       var form_data = $('.chat_form').serialize();
+	       e.preventDefault();
+	       $.ajax({
+		    url: '/user_message',data:form_data, method:'POST',
+		    success: function(data) {
+			 data = JSON.parse(data);
+			 $('.form_chat_message').val('');
+			 var add_div = $('<li class="left clearfix"><span class="chat-img pull-left"><img \
+			       src="/static/uploads/'+data.image+'" alt="User Avatar" class="img-circle added_image" /></span>\
+			       <div class="chat-body clearfix"><div class="header"><strong class="primary-font "> \
+			       '+data.name+' </strong><small class="pull-right text-muted label label-danger">\
+			       <i class="icon-time"></i>'+data.time+'</small></div><br /><p>'+data.message+'</p>\
+			       </div></li>');
+			 add_div.appendTo('.chat_append_message');
+		    }
+		});
+	  })
+	  $(document).on('click', '.remove_chat', function(e){
+	       var form_data = $(this).closest('.chat_now').attr('class').split(' ').pop();
+	       $.ajax({
+		    url: '/user_delete?chat_id='+form_data, method:'GET',
+		    success: function(data) {
+			 $('.'+data).remove();
+		    }
+		});
+	  })
+	  $(document).on('keydown', '.form_chat_message', function(){
+	       var data = $(this).data();
+	       if(!data['pressed'])
+	       {
+		   data['pressed'] = true;
+		   var key = $(this).closest('form').find('.chat_id').val();
+		   $.ajax({
+		       url: '/visitor_type?chat=user&type=start&chat_id='+key,
+		       async:false,dataType: 'JSONP',callback: 'response'
+		   });
+	       }
+	   });
+	   
+	  var delay = (function(){
+			 var timer = 0;
+			 return function(callback, ms){
+			     clearTimeout (timer);
+			     timer = setTimeout(callback, ms);
+			 };
+		    })();
+	  
+	  $(document).on('keyup', '.form_chat_message', function(){
+	       var data = $(this).data();
+	       var key = $(this).closest('form').find('.chat_id').val();
+	       delay(function(){
+		    data['pressed'] = false;
+		    $.ajax({
+			url: '/visitor_type?chat=user&type=stop&chat_id='+key,
+			async:false,dataType: 'JSONP',callback: 'response'
+		    });
+	       }, 1000 );
+	  });
+     });
+</script>
+{% endblock javascript %}
+</html>

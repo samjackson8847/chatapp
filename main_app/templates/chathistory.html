@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}
+     <title>Chat History</title>
+{% endblock title %}
+{% block css %}
+    <link rel="stylesheet" href="/static/plugins/switch/static/stylesheets/bootstrap-switch.css" />	
+    <link rel="stylesheet" href="/static/css/bootstrap-fileupload.min.css" />
+    <link rel="stylesheet" href="/static/css/table.css" />
+    <script type="text/javascript">
+            function altRows(id){
+                    if(document.getElementsByTagName){  	
+                            var table = document.getElementById(id);  
+                            var rows = table.getElementsByTagName("tr"); 
+                            for(i = 0; i < rows.length; i++){          
+                                    if(i % 2 == 0){
+                                            rows[i].className = "evenrowcolor";
+                                    }else{
+                                            rows[i].className = "oddrowcolor";
+                                    }      
+                            }
+                    }
+            }
+            window.onload=function(){
+                    altRows('alternatecolor');
+            }
+    </script>
+{% endblock css %}
+{% block base_image %}
+	{% if userprofile.image %}
+		   <img class="media-object img-thumbnail user-img main-img" alt="User Picture"
+			src="/static/uploads/{{userprofile.image}}" />
+	{% else %}
+		   <img class="media-object img-thumbnail user-img" alt="User Picture" src="/static/img/user.gif" />
+	{% endif %}
+{% endblock base_image %}
+{% block sidebar %}
+	<li class="panel"><a href="{% url 'view_chat' %}" ><i class="icon-table"></i> Dashboard</a></li>
+	<li class="panel">
+		<a href="{% url 'get_visitors' %}" data-parent="#menu" data-toggle="collapse" class="accordion-toggle"
+		   data-target="#chart-nav">
+		     <i class="icon-bar-chart"></i> Vistors
+		     <span class="pull-right"><i class="icon-angle-left"></i></span>
+		</a>
+	</li>
+	<li class="panel"><a href="{% url 'get_code' %}"><i class="icon-table"></i> Get Code</a></li>
+{% endblock sidebar %}
+{% block content %}
+    <div id="content">
+        <div id="ajax_table_result"> 
+            <table class="altrowstable" id="alternatecolor">
+                <tr>
+                    <th>S.no</th><th>Name</th>
+                    <th>Requested Time</th><th>Description</th>
+                    <th>Email</th><th>Url</th>
+                </tr>
+                {% for i in chatvisitor %}
+                    <tr>
+                        <td>{{forloop.counter}}</td>
+                        <td>{{i.name}}</td>
+                        <td>{{i.start_chat}}</td>
+                        <td>{{i.description}}</td>
+                        <td>{{i.email}}</td>
+                        <td>{{i.email}}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+        <div class="pagination">
+            <span class="step-links">
+                {% if chatvisitor.has_previous %}
+                    <a href="?page={{ chatvisitor.previous_page_number }}">previous</a>
+                {% endif %}
+        
+                <span class="current">
+                    Page {{ chatvisitor.number }} of {{ chatvisitor.paginator.num_pages }}.
+                </span>
+        
+                {% if chatvisitor.has_next %}
+                    <a href="?page={{ chatvisitor.next_page_number }}">next</a>
+                {% endif %}
+            </span>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block javascript %}
+    <script>
+	$(document).ready(function(){
+		function ajax_get_update(){
+			$.get(url, function(results){
+				//get the parts of the result you want to update. Just select the needed parts of the response
+				var table = $("table", results);
+				var span = $("span.step-links", results);
+		      
+				//update the ajax_table_result with the return value
+				$('#ajax_table_result').html(table);
+				$('.step-links').html(span);
+			}, "html");
+		}
+		$(document).on('click', '.step-links #prev',  function(e) {
+			e.preventDefault();
+			url = ($( '.step-links #prev' )[0].href);
+			ajax_get_update();
+		});
+		$(document).on('click', 'step-links #next', function(e) {
+			e.preventDefault();
+			url = ($( '.step-links #next' )[0].href);
+			ajax_get_update();
+		});
+		$( document ).ajaxStop( function() {
+			$( '.step-links #prev' ).click( function(e) {
+				e.preventDefault();
+				url = ($( '.step-links #prev' )[0].href);
+				ajax_get_update();
+			});
+			$( '.step-links #next' ).click( function(e) {
+				e.preventDefault();
+				url = ($( '.step-links #next' )[0].href);
+				ajax_get_update();
+			});
+		});
+	});
+    </script>
+{% endblock javascript %}
